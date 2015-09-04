@@ -1,3 +1,6 @@
+:- abolish(is_subclass_of/2).
+:- dynamic is_subclass_of/2.
+
 is_subclass_of(fish, animals).
 is_subclass_of(reptiles, animals).
 is_subclass_of(birds, animals).
@@ -66,7 +69,7 @@ getInheritedProperties(Animal, List):-
 	findall(Y2, restriction(Parent, _, Y2), List2),
 	getInheritedProperties(Parent, [List2|List]).
 
-%% Show animal
+%% Show Concept
 show(Animal):-
 	parent_classes(Animal, []),
 	write('Directe Sub classes : '),
@@ -75,6 +78,28 @@ show(Animal):-
 	getProperties(Animal, []),
 	getRestrictions(Animal, []),
 	getInheritedProperties(Animal, []).
+
+%% Show tree
+tree(Concept):-
+	writeln(Concept),
+	writeln('        |'),
+	findall(X, is_subclass_of(X, Concept), [H|T]),
+	writeln([H|T]),
+	findall(Y, is_subclass_of(Y, H), List),
+	writeln('        |'),
+	write(List),
+	write('-'),
+	findall(Z, is_subclass_of(Z, T), List2),
+	writeln(List2).
+
+%% Inserts plants concept into tree
+go1 :-
+	assertz(is_subclass_of(animals, things)),
+	assertz(is_subclass_of(plants, things)),
+	tree(things).
+
+
+
 
 
 
