@@ -50,10 +50,21 @@ parent_animal(Animal, FamilieOuder):-
 
 getProperties(Animal, _):-
 	findall(Y, property(Animal, _, Y), List),
-	writeln(List),
-	findall(Y2, restriction(Animal, _, Y2), List2),
-	write('Inherited properties'),
-	writeln(List2).
+	write('Properties :'),
+	write(List).
+
+getRestrictions(Animal,_):-
+	findall(Y, restriction(Animal, _, Y), List),
+	writeln(List).
+
+getInheritedProperties(animals, List):-
+	write('Inherited properties : '),
+	writeln(List).
+
+getInheritedProperties(Animal, List):-
+	parent_animal(Animal, Parent),
+	findall(Y2, restriction(Parent, _, Y2), List2),
+	getInheritedProperties(Parent, [List2|List]).
 
 %% Show animal
 show(Animal):-
@@ -61,8 +72,9 @@ show(Animal):-
 	write('Directe Sub classes : '),
 	findall(X, is_subclass_of(X, Animal), List),
 	writeln(List),
-	write('Properties :'),
-	getProperties(Animal, []).
+	getProperties(Animal, []),
+	getRestrictions(Animal, []),
+	getInheritedProperties(Animal, []).
 
 
 
