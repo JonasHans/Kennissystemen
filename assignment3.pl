@@ -9,7 +9,7 @@ multiply(A, B, Result) :-
 	Result =:= A * B.
 
 adder(A, B, Result) :-
-	Result is A + B.
+	Result =:= A + B.
 
 forward(A, B, C, D, E, F, G) :-
 	multiply(A, C, X),
@@ -18,8 +18,28 @@ forward(A, B, C, D, E, F, G) :-
 	adder(X, Y, F),
 	adder(Y, Z, G).
 
-%backward(A, B, C, D, E, X, Y, Z, F, G) :-
-	
+backward(A, B, C, D, E, X, Y, Z, F, G) :-
+	numbers(L),
+	member(A, L),
+	member(B, L),
+	member(C, L),
+	member(D, L),
+	member(E, L),
+	X is A * C,
+	Y is B * D,
+	Z is C * E,
+	F =:= X + Y,
+	G =:= Y + Z.
+
+
+numbers(List) :-
+	numbers(List, 0).
+numbers([], 21) :-
+	!.
+numbers(List, X) :-
+	XPlusOne is X + 1,
+	numbers(RemainingList, XPlusOne),
+	List = [X | RemainingList].
 	
 go :-
 	write('Input five numbers: '),
