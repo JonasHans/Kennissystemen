@@ -8,6 +8,18 @@ component(m3, mul, c, e, z).
 component(a1, add, x, y, f).
 component(a2, add, y, z, g).
 
+failure_rate(C, 0.0006) :-
+	component(C, mul, _, _, _).
+failure_rate(C, 0.0004) :-
+	component(C, add, _, _, _).
+
+output_var(X) :-
+	component(_, _, _, _, X),
+	(
+		\+ component(_, _, X, _, _),
+		\+ component(_, _, _, X, _)
+	).
+
 % Model 1 (example for forward chaining)
 val(1, a, 5).
 val(1, b, 8).
@@ -77,22 +89,22 @@ backward(M) :-
 	val(M, Y, YValue),
 	(
 		% If neither of the vales of the input variables X1 and X2 are defined in model M...
-		\+ val(M, X1, _),
+		(\+ val(M, X1, _),
 		\+ val(M, X2, _),
 
 		% Generate possible values for the input variables X1 and X2.
 		numb(X1Value),
-		numb(X2Value);
+		numb(X2Value));
 
 		% If one of the values of the input variables X1 and X2 is defined in model M, 
 		% derive only the other.
-		\+ val(M, X1, _),
+		(\+ val(M, X1, _),
 		val(M, X2, X2Value),
-		numb(X1Value);
+		numb(X1Value));
 
-		val(M, X1, X1Value),
+		(val(M, X1, X1Value),
 		\+ val(M, X2, _),
-		numb(X2Value)
+		numb(X2Value))
 	),
 
 	% Construct an inner gate predicate.
@@ -112,3 +124,37 @@ backward(M) :-
 	
 	% Continue to make derivations.
 	fail.
+
+faulty_vars(_, [], []) :-
+	!.
+faulty_vars(M, Variables, FaultyVariables) :-
+	Variables = [H | R],
+	measure_var(H, HValue),
+	val(M, H, RealHValue),
+	(
+		(
+			HValue = RealHValue,
+			MoreFaultyVariables = []
+		);
+		(
+			\+ HValue = RealHValue,
+			MoreFaultyVariables = [[H, HValue]]
+		)
+	),
+	faulty_vars(M, R, RemainingFaultyVariables),
+	append(RemainingFaultyVariables, MoreFaultyVariables, FaultyVariables).
+
+measure_var(X, Input) :-
+	write('What is the value of '),
+	write(X),
+	write('? '),
+	read(Input),
+	write_ln(' ').
+
+find_highest_faulty_comp(Output, InputComp)
+
+go(M) :-
+	\+ forward(M),
+	findall(X, output_var(X), OutputVariables),
+	faulty_vars(M, OutputVariables, FaultyVariables),
+	print(FaultyVariables).
